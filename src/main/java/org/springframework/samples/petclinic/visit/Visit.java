@@ -20,10 +20,14 @@ import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.lang.Nullable;
 import org.springframework.samples.petclinic.model.BaseEntity;
+import org.springframework.samples.petclinic.vet.Vet;
+import org.springframework.samples.petclinic.vet.Vets;
 
 /**
  * Simple JavaBean domain object representing a visit.
@@ -45,6 +49,12 @@ public class Visit extends BaseEntity {
 
 	@Column(name = "pet_id")
 	private Integer petId;
+
+	@Column(name = "vet_name")
+	private String vetName;
+
+	@Column(name = "is_cancel")
+	private boolean isCancel;
 
 	/**
 	 * Creates a new instance of Visit for the current date
@@ -77,4 +87,30 @@ public class Visit extends BaseEntity {
 		this.petId = petId;
 	}
 
+	public String getVetName() {
+		return vetName;
+	}
+
+	public void setVetName(String vetName) {
+		this.vetName = vetName;
+	}
+
+	public boolean isCancel() {
+		return isCancel;
+	}
+
+	public void setCancel(boolean cancel) {
+		isCancel = cancel;
+	}
+
+	@Override
+	public String toString() {
+		return "Visit{" +
+			"date=" + date +
+			", description='" + description + '\'' +
+			", petId=" + petId +
+			", vetName='" + vetName + '\'' +
+			", isCancel=" + isCancel +
+			'}';
+	}
 }

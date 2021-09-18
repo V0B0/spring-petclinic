@@ -19,6 +19,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
@@ -44,9 +45,12 @@ class VisitController {
 
 	private final PetRepository pets;
 
-	public VisitController(VisitRepository visits, PetRepository pets) {
+	private final VetRepository vets;
+
+	public VisitController(VisitRepository visits, PetRepository pets, VetRepository vets) {
 		this.visits = visits;
 		this.pets = pets;
+		this.vets = vets;
 	}
 
 	@InitBinder
@@ -74,12 +78,14 @@ class VisitController {
 	// Spring MVC calls method loadPetWithVisit(...) before initNewVisitForm is called
 	@GetMapping("/owners/*/pets/{petId}/visits/new")
 	public String initNewVisitForm(@PathVariable("petId") int petId, Map<String, Object> model) {
+		model.put("vets", vets.findAll());
 		return "pets/createOrUpdateVisitForm";
 	}
 
 	// Spring MVC calls method loadPetWithVisit(...) before processNewVisitForm is called
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/new")
 	public String processNewVisitForm(@Valid Visit visit, BindingResult result) {
+		System.out.println(visit);
 		if (result.hasErrors()) {
 			return "pets/createOrUpdateVisitForm";
 		}
@@ -89,4 +95,33 @@ class VisitController {
 		}
 	}
 
+	@GetMapping("/owners/*/pets/{petId}/visits/{visitId}/edit")
+	public String getUpdateVisitForm(@PathVariable("visitId") int visitId, @PathVariable("petId") int petId,
+									 Map<String, Object> model){
+		model.put("visitBefore", this.visits.findByPetId(petId).get(visitId));
+		model.put("vets", vets.findAll());
+		return "pets/updateVisit";
+	}
+
+	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/edit")
+	public String processUpdateVisitForm(@PathVariable("petId") int petId, @PathVariable("visitId") int visitId,
+										 @Valid Visit visit, BindingResult result) {
+		if (result.hasErrors()) {
+			return "pets/updateVisit";
+		}
+		else {
+			visit.setId(visits.findByPetId(petId).get(visitId).getId());
+			visits.save(visit);
+			return "redirect:/owners/{ownerId}";
+		}
+	}
+
+	@GetMapping("/owners/{ownerId}/pets/{petId}/visits/{visitId}/cancel")
+	public String cancelVisit(@PathVariable("petId") int petId, @PathVariable("visitId") int visitId,
+							  Visit visit){
+		visit.setCancel(true);
+		visit.setId(visits.findByPetId(petId).get(visitId).getId());
+		visits.save(visit);
+		return "redirect:/owners/{ownerId}";
+	}
 }

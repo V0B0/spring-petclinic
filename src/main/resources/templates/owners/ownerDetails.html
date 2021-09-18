@@ -58,19 +58,34 @@
               <tr>
                 <th>Visit Date</th>
                 <th>Description</th>
+                <th>Veterinarian</th>
               </tr>
             </thead>
             <tr th:each="visit : ${pet.visits}">
-              <td th:text="${#temporals.format(visit.date, 'yyyy-MM-dd')}"></td>
-              <td th:text="${visit?.description}"></td>
+              <th:block th:if="${visit.isCancel()}">
+                <td style="color: red" th:text="${#temporals.format(visit.date, 'yyyy-MM-dd')}"></td>
+                <td style="color: red" th:text="${visit?.description}"></td>
+                <td style="color: red" th:text="${visit?.vetName}"></td>
+              </th:block>
+              <th:block th:unless="${visit.isCancel()}">
+                <td th:text="${#temporals.format(visit.date, 'yyyy-MM-dd')}"></td>
+                <td th:text="${visit?.description}"></td>
+                <td th:text="${visit?.vetName}"></td>
+                <td><a
+                  th:href="@{{ownerId}/pets/{petId}/visits/{visitId}/edit(ownerId=${owner.id},
+                  petId=${pet.id},visitId=${pet.visits.indexOf(visit)})}">Edit visit</a></td>
+                <td><a th:href="@{{ownerId}/pets/{petId}/visits/{visitId}/cancel(
+                  ownerId=${owner.id},petId=${pet.id},visitId=${pet.visits.indexOf(visit)},
+                  description=${visit.description},vetName=${visit.vetName})}">Cancel</a></td>
+              </th:block>
             </tr>
             <tr>
               <td><a
                 th:href="@{{ownerId}/pets/{petId}/edit(ownerId=${owner.id},petId=${pet.id})}">Edit
                   Pet</a></td>
               <td><a
-                th:href="@{{ownerId}/pets/{petId}/visits/new(ownerId=${owner.id},petId=${pet.id})}">Add
-                  Visit</a></td>
+                th:href="@{{ownerId}/pets/{petId}/visits/new(ownerId=${owner.id},petId=${pet.id})}">
+                  Add Visit</a></td>
             </tr>
           </table>
         </td>
